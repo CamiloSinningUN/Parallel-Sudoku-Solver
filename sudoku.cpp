@@ -20,6 +20,7 @@
  */
 
 #include <iostream>
+#include <fstream>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -90,9 +91,32 @@ int main(int argc, char *argv[])
 	}
 
 	// print the time
-	std::cout << "Parallel computation took " << t4 - t3 << " seconds ("
-			  << omp_get_max_threads() << " threads)." << std::endl
+	double time_taken = t4 - t3;
+	int threads_used = omp_get_max_threads();
+	std::cout << "Parallel computation took " << time_taken << " seconds (" << threads_used << " threads)." << std::endl
 			  << std::endl;
+
+	// Save the data to a CSV file
+	// Create the output directory if it does not exist
+	std::ofstream csv_file;
+	csv_file.open("../output/times.csv", std::ios::app);
+	if (csv_file.is_open())
+	{
+		// Check if the file is empty
+		csv_file.seekp(0, std::ios::end);
+		if (csv_file.tellp() == 0)
+		{
+			// Write the header if the file is empty
+			csv_file << "time,grid_size,block_size,threads_used,solutions\n";
+		}
+		// Append the data
+		csv_file << time_taken << "," << argv[1] << "," << argv[2] << "," << threads_used << "," << found_sudokus << "\n";
+		csv_file.close();
+	}
+	else
+	{
+		std::cerr << "Unable to open file for writing." << std::endl;
+	}
 
 	return 0;
 }
