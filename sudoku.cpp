@@ -42,19 +42,21 @@ bool UsedInBox(CSudokuBoard *sudoku, int boxStartRow, int boxStartCol, int num);
 // Checks whether it will be legal to assign num to the given row, col
 bool isSafe(CSudokuBoard *sudoku, int row, int col, int num);
 // Assigns values to all unassigned locations in such a way to meet the requirements for Sudoku solution
-void SolveSudoku(CSudokuBoard *sudoku);
+void SolveSudoku(CSudokuBoard *sudoku, int depth, int max_depth);
 
 int found_sudokus = 0;
 
 int main(int argc, char *argv[])
 {
+	int max_depth = argc > 4 ? atoi(argv[4]) : 3;
+
 	// measure the time
 	double t3, t4;
 
 	// expect three command line arguments: field size, block size, and input file
-	if (argc != 4)
+	if (argc != 5)
 	{
-		std::cout << "Usage: sudoku.exe <field size> <block size> <input filename>" << std::endl;
+		std::cout << "Usage: sudoku.exe <field size> <block size> <input filename> <max_depth>" << std::endl;
 		std::cout << std::endl;
 		return -1;
 	}
@@ -80,7 +82,7 @@ int main(int argc, char *argv[])
 		{
 #pragma omp single
 			{
-				SolveSudoku(sudoku1);
+				SolveSudoku(sudoku1, 0, 3);
 			}
 		}
 		// END OF IMPLEMENTATION
@@ -98,6 +100,7 @@ int main(int argc, char *argv[])
 
 	// Save the data to a CSV file
 	// Create the output directory if it does not exist
+	// TODO: write also max_depth
 	std::ofstream csv_file;
 	csv_file.open("../output/times.csv", std::ios::app);
 	if (csv_file.is_open())
@@ -107,10 +110,10 @@ int main(int argc, char *argv[])
 		if (csv_file.tellp() == 0)
 		{
 			// Write the header if the file is empty
-			csv_file << "time,grid_size,block_size,threads_used,solutions\n";
+			csv_file << "time,grid_size,block_size,threads_used,solutions,max_depth\n";
 		}
 		// Append the data
-		csv_file << time_taken << "," << argv[1] << "," << argv[2] << "," << threads_used << "," << found_sudokus << "\n";
+		csv_file << time_taken << "," << argv[1] << "," << argv[2] << "," << threads_used << "," << found_sudokus << "," << max_depth << "\n";
 		csv_file.close();
 	}
 	else
@@ -161,7 +164,7 @@ bool isSafe(CSudokuBoard *sudoku, int row, int col, int num)
 	return !UsedInRow(sudoku, row, num) && !UsedInCol(sudoku, col, num) && !usedInBox(sudoku, row - row % sudoku->getBlockSize(), col - col % sudoku->getBlockSize(), num) && sudoku->get(row, col) == UNASSIGNED;
 }
 
-void SolveSudoku(CSudokuBoard *sudoku)
+void SolveSudoku(CSudokuBoard *sudoku, int depth, int max_depth)
 {
 	int row, col;
 
@@ -183,13 +186,25 @@ void SolveSudoku(CSudokuBoard *sudoku)
 	{
 		if (isSafe(sudoku, row, col, num))
 		{
-#pragma omp task firstprivate(row, col, num) shared(sudoku)
+			if (depth < max_depth)
+			{
+#pragma omp task firstprivate(row, col, num, depth) shared(sudoku)
+				{
+					// Create a copy of the board to avoid shared state issues
+					CSudokuBoard *childSudoku = new CSudokuBoard(*sudoku);
+
+					childSudoku->set(row, col, num);
+					SolveSudoku(childSudoku, depth + 1, max_depth);
+					delete childSudoku;
+				}
+			}
+			else
 			{
 				// Create a copy of the board to avoid shared state issues
 				CSudokuBoard *childSudoku = new CSudokuBoard(*sudoku);
 
 				childSudoku->set(row, col, num);
-				SolveSudoku(childSudoku);
+				SolveSudoku(childSudoku, depth + 1, max_depth);
 				delete childSudoku;
 			}
 		}
