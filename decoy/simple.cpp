@@ -21,9 +21,13 @@ int main(int argc, char *argv[])
 
     omp_set_num_threads(num_threads);
 
-    const int N = 1000; // Size of the array
+    // Print the number of processors available
+    int num_procs = omp_get_num_procs();
+    std::cout << "Number of processors available: " << num_procs << std::endl;
+
+    const int N = 10000000; // Larger size for meaningful workload
     std::vector<int> arr(N);
-    int total_sum = 0;
+    long long total_sum = 0;
 
     // Initialize the array with some values
     for (int i = 0; i < N; i++)
@@ -35,18 +39,24 @@ int main(int argc, char *argv[])
     double start_time = omp_get_wtime();
 
     // Parallel region with tasks
+    int chunk_size = N / num_threads;
 #pragma omp parallel
     {
-        // A single region to avoid multiple threads creating tasks redundantly
 #pragma omp single
         {
-            for (int i = 0; i < N; i++)
+            for (int i = 0; i < num_threads; i++)
             {
-                // Create a task for each array element
+                int start = i * chunk_size;
+                int end = (i == num_threads - 1) ? N : start + chunk_size;
 #pragma omp task shared(total_sum)
                 {
+                    long long local_sum = 0;
+                    for (int j = start; j < end; j++)
+                    {
+                        local_sum += arr[j];
+                    }
 #pragma omp atomic
-                    total_sum += arr[i]; // Atomically add to the total sum
+                    total_sum += local_sum;
                 }
             }
         }
