@@ -77,14 +77,8 @@ int main(int argc, char *argv[])
 		// solve the Sudoku by finding (and printing) all solutions
 		t3 = omp_get_wtime();
 
-// IMPLEMENTATION OF THE PARALLEL SUDOKU SOLVER
-#pragma omp parallel
-		{
-#pragma omp single
-			{
-				SolveSudoku(sudoku1, 0, 3);
-			}
-		}
+		// IMPLEMENTATION OF THE PARALLEL SUDOKU SOLVER
+		SolveSudoku(sudoku1, 0, 3);
 		// END OF IMPLEMENTATION
 
 		t4 = omp_get_wtime();
@@ -171,44 +165,51 @@ void SolveSudoku(CSudokuBoard *sudoku, int depth, int max_depth)
 	// Check if there are no unassigned locations
 	if (!FindUnassignedLocation(sudoku, row, col))
 	{
-#pragma omp critical
-		{
-			found_sudokus++;
-			std::cout << "Solution " << found_sudokus << std::endl;
-			sudoku->printBoard();
-		}
+
+		found_sudokus++;
+		std::cout << "Solution " << found_sudokus << std::endl;
+		sudoku->printBoard();
+
 		sudoku->incrementSolutionCounter();
 		return;
 	}
 
-	// Iterate through all possible numbers for the current cell
-	for (int num = 1; num <= sudoku->getFieldSize(); num++)
+#pragma omp parallel
 	{
-		if (isSafe(sudoku, row, col, num))
+#pragma omp single nowait
 		{
-			if (depth < max_depth)
+			// Iterate through all possible numbers for the current cell
+			for (int num = 1; num <= sudoku->getFieldSize(); num++)
 			{
-#pragma omp task firstprivate(row, col, num, depth) shared(sudoku)
+				if (depth < max_depth)
 				{
-					// Create a copy of the board to avoid shared state issues
-					CSudokuBoard *childSudoku = new CSudokuBoard(*sudoku);
+#pragma omp task firstprivate(num)
+					{
+						if (isSafe(sudoku, row, col, num))
+						{
+							// Create a copy of the board to avoid shared state issues
+							CSudokuBoard *childSudoku = new CSudokuBoard(*sudoku);
 
-					childSudoku->set(row, col, num);
-					SolveSudoku(childSudoku, depth + 1, max_depth);
-					delete childSudoku;
+							childSudoku->set(row, col, num);
+							SolveSudoku(childSudoku, depth + 1, max_depth);
+							delete childSudoku;
+						}
+					}
 				}
-			}
-			else
-			{
-				// Create a copy of the board to avoid shared state issues
-				CSudokuBoard *childSudoku = new CSudokuBoard(*sudoku);
+				else
+				{
+					if (isSafe(sudoku, row, col, num))
+					{
+						// Create a copy of the board to avoid shared state issues
+						CSudokuBoard *childSudoku = new CSudokuBoard(*sudoku);
 
-				childSudoku->set(row, col, num);
-				SolveSudoku(childSudoku, depth + 1, max_depth);
-				delete childSudoku;
+						childSudoku->set(row, col, num);
+						SolveSudoku(childSudoku, depth + 1, max_depth);
+						delete childSudoku;
+					}
+				}
 			}
 		}
 	}
-
 #pragma omp taskwait
 }
