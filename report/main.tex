@@ -1,4 +1,4 @@
-\documentclass[a4paper,11pt]{article}
+\documentclass[a4paper,10pt]{article}
 
 % Packages
 \usepackage{graphicx}
@@ -54,7 +54,7 @@
 % \tableofcontents
 % \newpage
 
-
+\begin{multicols}{2} 
 \section{Experimental Setup}
 
 The program implements a parallel Sudoku solver using OpenMP. The algorithm recursively explores all possible solutions to a given Sudoku puzzle by assigning numbers to unfilled cells, ensuring no conflicts in rows, columns, or subgrids.
@@ -71,6 +71,8 @@ All experiments were conducted on a laptop with the following processor details:
     \item \textbf{Threads:} 8
 \end{itemize}
 
+Since the processor has 8 threads, but the experiments were conducted with thread counts ranging from 1 to 12, the results also include the execution time for thread counts higher than the number of available threads to assess the impact of the overhead of creating additional threads.
+
 \subsection{Algorithm parameters}
 
 \begin{itemize}
@@ -85,26 +87,26 @@ All experiments were conducted on a laptop with the following processor details:
 
 \subsubsection{Fixed depth}
 
-The first set of experiments was conducted with a fixed max\_depth of 3. For each thread count, 3 samples were collected for 9x9 and 25x25 Sudoku puzzles.
+The first set of experiments was conducted with a fixed max\_depth of 3. For each thread count, 3 samples were collected for 9x9 and 16x16 Sudoku puzzles. On the other hand, the 25x25 Sudoku puzzle was only tested once per thread count due to the high execution time.
 
 \subsubsection{Variable depth}
-The second set of experiments was conducted with a variable max\_depth. For thread counts ranging from 1 to 12, experiments were conducted for each max\_depth value in {3, 5, 7, 9}. Three samples were collected for each configuration.
+The second set of experiments was conducted with a variable max\_depth. For thread counts ranging from 1 to 12, experiments were conducted for each max\_depth value in {3, 5, 7, 9}. Three samples were collected for each 9x9 and 16x16 Sudoku.
 
 
-\section{Performance Measurements}
+% \section{Performance Measurements}
 
-Summarized results are saved in a CSV file with columns:
+% Summarized results are saved in a CSV file with columns:
 
-\begin{enumerate}
-    \item Execution time.
-    \item Grid size.
-    \item Block size.
-    \item Number of threads.
-    \item Number of solutions.
-    \item Max depth.
-\end{enumerate}
+% \begin{enumerate}
+%     \item Execution time.
+%     \item Grid size.
+%     \item Block size.
+%     \item Number of threads.
+%     \item Number of solutions.
+%     \item Max depth.
+% \end{enumerate}
 
-Sample output: The program outputs the timing and results to the console and appends them to the times.csv file.
+% Sample output: The program outputs the timing and results to the console and appends them to the times.csv file.
 
 \section{Results}
 
@@ -112,49 +114,77 @@ The following results were taken from times.csv file, and only the threads avail
 
 \subsection{Fixed depth}
 
+In the fixed-depth experiments, the results indicate that overall increasing the number of threads lead to performance improvements in the parallel Sudoku solver. The 16x16 Sudoku puzzles (Figure~\ref{fig:16x16_fixed_depth}) show consistent reductions in execution time as the number of threads increases. The 25x25 Sudoku puzzle (Figure~\ref{fig:25x25_fixed_depth}) also demonstrates similar trends, although in 4 threads the execution time is higher than in 2 threads. The 9x9 Sudoku puzzles (Figure~\ref{fig:9x9_fixed_depth}) exhibit more variability, with some thread configurations performing worse than others. These results suggest that the performance gains from parallelization are more pronounced in larger Sudoku puzzles, where the overhead of task creation is amortized over more work.
+
 \begin{figure}[H]
     \centering
-    \begin{subfigure}[b]{0.35\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{9x9_fixed_depth.png}
-        \caption{Execution time for 9x9 Sudoku puzzles with fixed depth.}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.35\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{16x16_fixed_depth.png}
-        \caption{Execution time for 16x16 Sudoku puzzles with fixed depth.}
-    \end{subfigure}
-    \caption{Comparison of execution times for fixed depth Sudoku puzzles.}
+    \includegraphics[width=0.3\textwidth]{9x9_fixed_depth.png}
+    \caption{Execution time for 9x9 Sudoku puzzles with fixed depth.}
+    \label{fig:9x9_fixed_depth}
 \end{figure}
 
-In the fixed-depth experiments, the results indicate that increasing the number of threads does not consistently lead to significant performance improvements, especially for the 16x16 Sudoku puzzles. While some reduction in execution time is observed for lower thread counts, the variance increases with more threads, and the performance gains diminish. This suggests limited parallelization efficiency due to factors like overhead from thread management, synchronization, or insufficient workload distribution across threads at fixed depths.
+\begin{figure}[H]
+    % \vspace{-0.5cm}
+    \centering
+    \includegraphics[width=0.3\textwidth]{16x16_fixed_depth.png}
+    \caption{Execution time for 16x16 Sudoku puzzles with fixed depth.}
+    \label{fig:16x16_fixed_depth}
+\end{figure}
+
+\begin{figure}[H]
+    % \vspace{-1.5cm}
+    \centering
+    \includegraphics[width=0.3\textwidth]{25x25_fixed_depth.png}
+    \caption{Execution time for 25x25 Sudoku puzzles with fixed depth.}
+    \label{fig:25x25_fixed_depth}
+\end{figure}
+
+% \begin{figure}[H]
+%     \caption{Comparison of execution times for fixed depth Sudoku puzzles.}
+%     \centering
+%     \begin{subfigure}[b]{0.3\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{9x9_fixed_depth.png}
+%         \caption{Execution time for 9x9 Sudoku puzzles with fixed depth.}
+%     \end{subfigure}
+%     \hfill
+%     \begin{subfigure}[b]{0.3\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{16x16_fixed_depth.png}
+%         \caption{Execution time for 16x16 Sudoku puzzles with fixed depth.}
+%     \end{subfigure}
+%     \hfill
+%     \begin{subfigure}[b]{0.3\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{25x25_fixed_depth.png}
+%         \caption{Execution time for 25x25 Sudoku puzzles with fixed depth.}
+%     \end{subfigure}
+% \end{figure}
 
 \subsection{Variable depth}
 
 \begin{figure}[H]
+    % \vspace{-1.5cm}
     \centering
-    \begin{subfigure}[b]{0.45\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{9x9_var_depth.png}
-        \caption{Execution time for 9x9 Sudoku puzzles with variable depth.}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.45\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{16x16_var_depth.png}
-        \caption{Execution time for 16x16 Sudoku puzzles with variable depth.}
-    \end{subfigure}
-    \caption{Comparison of execution times for variable depth Sudoku puzzles.}
+    \includegraphics[width=0.4\textwidth]{9x9_var_depth.png}
+    \caption{Execution time for 9x9 Sudoku puzzles with variable depth.}
+    \label{fig:9x9_var_depth}
 \end{figure}
 
-For variable-depth experiments, performance trends are similarly unclear. The 9x9 Sudoku puzzles show minor gains with increasing thread counts at specific depths but reveal diminishing returns at higher depths. The 16x16 puzzles demonstrate significant variability, with some thread configurations performing worse as depth increases. These results highlight challenges in balancing task granularity and overhead when managing parallel recursion, emphasizing the need for better load-balancing strategies to maximize thread utilization effectively.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{16x16_var_depth.png}
+    \caption{Execution time for 16x16 Sudoku puzzles with variable depth.}
+    \label{fig:16x16_var_depth}
+\end{figure}
+
+For variable-depth experiments, performance trends are similarly unclear for the 9x9 Sudoku puzzle (Figure~\ref{fig:9x9_var_depth}), while the 16x16 Sudoku puzzle (Figure~\ref{fig:16x16_var_depth}) shows more consistent improvements with more threads. Although none of them seemed to have a clear trend with respect to the depth of the recursion.
 
 \section{Design Choices}
 
 \begin{enumerate}
     \item \textbf{Parallelization with OpenMP:} The algorithm uses OpenMP to parallelize the Sudoku solving process. More specifically using the tasks directive.
-    % \item \textbf{Recursive Backtracking:} The core of the algorithm is a recursive backtracking approach.
+    \item \textbf{Recursive Backtracking:} The core of the algorithm is a recursive backtracking approach.
     \item \textbf{Depth Limitation:} To control the granularity of parallel tasks and avoid excessive task creation, the algorithm limits the depth of parallel recursion using the depth and max\_depth parameters.
     \item \textbf{Board Copying:} To avoid shared state issues between parallel tasks, the algorithm creates a copy of the Sudoku board for each task.
     \item \textbf{CSV Logging:} The algorithm logs the performance data to a CSV file.
@@ -162,6 +192,7 @@ For variable-depth experiments, performance trends are similarly unclear. The 9x
 
 \section{Conclusions}
 
-% The results of the experiments suggest it is not clear that increasing the number of threads consistently leads to performance improvements in the parallel Sudoku solver using a backtracking algorithm. The fixed-depth experiments show limited gains with more threads, while the variable-depth experiments exhibit significant variability in performance. The challenges in balancing task granularity, load distribution, and overhead management highlight the need for more sophisticated parallelization strategies to maximize thread utilization effectively. 
+In summary, the parallel Sudoku solver demonstrates performance improvements with increasing thread counts, especially for larger Sudoku puzzles. The fixed-depth experiments show consistent reductions in execution time as the number of threads increases, while the variable-depth experiments exhibits small changes in performance. The results suggest that the parallel algorithm is effective in reducing the execution time of Sudoku puzzles, particularly for larger grid sizes.
 
+\end{multicols}
 \end{document}
