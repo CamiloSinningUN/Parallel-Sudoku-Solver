@@ -1,11 +1,11 @@
 # Fdb version 4
-["pdflatex"] 1732114636 "c:/Users/camil/Desktop/POLIMI/Semestre 3/AAPP/Challenge_2_SinningStegeVergara/report/main.tex" "main.pdf" "main" 1732114639 0
-  "16x16_fixed_depth.png" 1732113173 29033 26c5b69e075f19417165929a694b748a ""
-  "16x16_var_depth.png" 1732113219 122317 7d6b9ccdd62b625d1639a5f7b8e765ab ""
-  "9x9_fixed_depth.png" 1732113151 28966 db8a9989871c27a6012643ad927a71ce ""
-  "9x9_var_depth.png" 1732113200 101259 e8211fb5a2c07c57cf0c89d88ea46ecf ""
+["pdflatex"] 1732154290 "c:/Users/camil/Desktop/POLIMI/Semestre 3/AAPP/Challenge_2_SinningStegeVergara/report/main.tex" "main.pdf" "main" 1732154293 0
+  "16x16_fixed_depth.png" 1732153796 28160 686a2ca050ccb2e26b23107bfd69e0de ""
+  "16x16_var_depth.png" 1732153827 105435 4789dc0c26c4fe588fafb065a3dbd127 ""
+  "9x9_fixed_depth.png" 1732153779 31764 4382de1a4e3c4c7a857b49792a5dcbc4 ""
+  "9x9_var_depth.png" 1732153809 110804 e6312391f87c441364788f214ec8ed0d ""
   "Logo_Polimi.png" 1732111933 83004 5ca56cca4303a56d80345462e3e25fa3 ""
-  "c:/Users/camil/Desktop/POLIMI/Semestre 3/AAPP/Challenge_2_SinningStegeVergara/report/main.tex" 1732114634 7189 b8df6b90a71eaf3387c839b488a9c653 ""
+  "c:/Users/camil/Desktop/POLIMI/Semestre 3/AAPP/Challenge_2_SinningStegeVergara/report/main.tex" 1732154287 7193 36482412c158ffdac1dd94f6a38c28ba ""
   "c:/texlive/2023/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1700157072 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "c:/texlive/2023/texmf-dist/fonts/map/fontname/texfonts.map" 1700160094 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "c:/texlive/2023/texmf-dist/fonts/tfm/jknappen/ec/tcrm1095.tfm" 1700157817 1536 02c06700a42be0f5a28664c7273f82e7 ""
@@ -64,8 +64,8 @@
   "c:/texlive/2023/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1700164851 4754190 e930cb192d271923aeac4effe1abd9bb ""
   "c:/texlive/2023/texmf-var/web2c/pdftex/pdflatex.fmt" 1700164978 8213416 462589945b62a887adf5e7c0cb2f82c0 ""
   "c:/texlive/2023/texmf.cnf" 1700164819 713 e69b156964470283e0530f5060668171 ""
-  "main.aux" 1732114638 1639 376f73895c3d7602b3f0517746032940 "pdflatex"
-  "main.tex" 1732114634 7189 b8df6b90a71eaf3387c839b488a9c653 ""
+  "main.aux" 1732154293 1639 376f73895c3d7602b3f0517746032940 "pdflatex"
+  "main.tex" 1732154287 7193 36482412c158ffdac1dd94f6a38c28ba ""
   (generated)
   "main.aux"
   "main.log"

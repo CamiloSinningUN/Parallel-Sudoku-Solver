@@ -42,7 +42,7 @@ bool UsedInBox(CSudokuBoard *sudoku, int boxStartRow, int boxStartCol, int num);
 // Checks whether it will be legal to assign num to the given row, col
 bool isSafe(CSudokuBoard *sudoku, int row, int col, int num);
 // Assigns values to all unassigned locations in such a way to meet the requirements for Sudoku solution
-void SolveSudoku(CSudokuBoard *sudoku, int depth, int max_depth);
+void SolveSudoku(CSudokuBoard *sudoku, int row, int col, int depth, int max_depth);
 
 int found_sudokus = 0;
 
@@ -77,9 +77,15 @@ int main(int argc, char *argv[])
 		// solve the Sudoku by finding (and printing) all solutions
 		t3 = omp_get_wtime();
 
-		// IMPLEMENTATION OF THE PARALLEL SUDOKU SOLVER
-		SolveSudoku(sudoku1, 0, 3);
-		// END OF IMPLEMENTATION
+#pragma omp parallel
+		{
+#pragma omp single
+			{
+				// IMPLEMENTATION OF THE PARALLEL SUDOKU SOLVER
+				SolveSudoku(sudoku1, 0, 0, 0, max_depth);
+				// END OF IMPLEMENTATION
+			}
+		}
 
 		t4 = omp_get_wtime();
 
@@ -158,58 +164,63 @@ bool isSafe(CSudokuBoard *sudoku, int row, int col, int num)
 	return !UsedInRow(sudoku, row, num) && !UsedInCol(sudoku, col, num) && !usedInBox(sudoku, row - row % sudoku->getBlockSize(), col - col % sudoku->getBlockSize(), num) && sudoku->get(row, col) == UNASSIGNED;
 }
 
-void SolveSudoku(CSudokuBoard *sudoku, int depth, int max_depth)
+void SolveSudoku(CSudokuBoard *sudoku, int row, int col, int depth, int max_depth)
 {
-	int row, col;
+	// Check if we have reached the end of the board
+	int BOARD_SIZE = sudoku->getFieldSize();
+	int abs_index = row * BOARD_SIZE + col;
 
-	// Check if there are no unassigned locations
-	if (!FindUnassignedLocation(sudoku, row, col))
+	if (abs_index >= BOARD_SIZE * BOARD_SIZE)
 	{
-
 		found_sudokus++;
 		std::cout << "Solution " << found_sudokus << std::endl;
 		sudoku->printBoard();
-
 		sudoku->incrementSolutionCounter();
 		return;
 	}
 
-#pragma omp parallel
+	// Calculate the next cell
+	int row_next = (abs_index + 1) / BOARD_SIZE;
+	int col_next = (abs_index + 1) % BOARD_SIZE;
+
+	if (sudoku->get(row, col) != UNASSIGNED)
 	{
-#pragma omp single nowait
+		// If the cell is already filled, proceed to the next cell
+		SolveSudoku(sudoku, row_next, col_next, depth, max_depth);
+	}
+	else
+	{
+		// Iterate through all possible numbers for the current cell
+		for (int num = 1; num <= BOARD_SIZE; ++num)
 		{
-			// Iterate through all possible numbers for the current cell
-			for (int num = 1; num <= sudoku->getFieldSize(); num++)
+			if (isSafe(sudoku, row, col, num))
 			{
 				if (depth < max_depth)
 				{
+// Parallel task creation for shallower recursion levels
 #pragma omp task firstprivate(num)
 					{
-						if (isSafe(sudoku, row, col, num))
-						{
-							// Create a copy of the board to avoid shared state issues
-							CSudokuBoard *childSudoku = new CSudokuBoard(*sudoku);
+						// Work on a new copy of the board
+						CSudokuBoard *childSudoku = new CSudokuBoard(*sudoku);
+						childSudoku->set(row, col, num);
 
-							childSudoku->set(row, col, num);
-							SolveSudoku(childSudoku, depth + 1, max_depth);
-							delete childSudoku;
-						}
+						SolveSudoku(childSudoku, row_next, col_next, depth + 1, max_depth);
+
+						delete childSudoku; // Clean up memory
 					}
 				}
 				else
 				{
-					if (isSafe(sudoku, row, col, num))
-					{
-						// Create a copy of the board to avoid shared state issues
-						CSudokuBoard *childSudoku = new CSudokuBoard(*sudoku);
+					// Avoid task creation if we are too deep
+					sudoku->set(row, col, num);
 
-						childSudoku->set(row, col, num);
-						SolveSudoku(childSudoku, depth + 1, max_depth);
-						delete childSudoku;
-					}
+					SolveSudoku(sudoku, row_next, col_next, depth + 1, max_depth);
+
+					sudoku->set(row, col, UNASSIGNED); // Reset for backtracking
 				}
 			}
 		}
 	}
+
 #pragma omp taskwait
 }

@@ -154,7 +154,7 @@ For variable-depth experiments, performance trends are similarly unclear. The 9x
 
 \begin{enumerate}
     \item \textbf{Parallelization with OpenMP:} The algorithm uses OpenMP to parallelize the Sudoku solving process. More specifically using the tasks directive.
-    \item \textbf{Recursive Backtracking:} The core of the algorithm is a recursive backtracking approach.
+    % \item \textbf{Recursive Backtracking:} The core of the algorithm is a recursive backtracking approach.
     \item \textbf{Depth Limitation:} To control the granularity of parallel tasks and avoid excessive task creation, the algorithm limits the depth of parallel recursion using the depth and max\_depth parameters.
     \item \textbf{Board Copying:} To avoid shared state issues between parallel tasks, the algorithm creates a copy of the Sudoku board for each task.
     \item \textbf{CSV Logging:} The algorithm logs the performance data to a CSV file.
@@ -162,6 +162,6 @@ For variable-depth experiments, performance trends are similarly unclear. The 9x
 
 \section{Conclusions}
 
-The results of the experiments suggest it is not clear that increasing the number of threads consistently leads to performance improvements in the parallel Sudoku solver using a backtracking algorithm. The fixed-depth experiments show limited gains with more threads, while the variable-depth experiments exhibit significant variability in performance. The challenges in balancing task granularity, load distribution, and overhead management highlight the need for more sophisticated parallelization strategies to maximize thread utilization effectively. 
+% The results of the experiments suggest it is not clear that increasing the number of threads consistently leads to performance improvements in the parallel Sudoku solver using a backtracking algorithm. The fixed-depth experiments show limited gains with more threads, while the variable-depth experiments exhibit significant variability in performance. The challenges in balancing task granularity, load distribution, and overhead management highlight the need for more sophisticated parallelization strategies to maximize thread utilization effectively. 
 
 \end{document}
